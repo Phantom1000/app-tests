@@ -11,7 +11,6 @@ import java.util.List;
 import com.phantom.models.Entity;
 
 public class Manager {
-    private static Long count = 1L;
 
     private static final String DATABASE_URL = "jdbc:postgresql://localhost:5432/apptests";
     private static final String DATABASE_USER = "postgres";
@@ -22,6 +21,15 @@ public class Manager {
     public static Manager getInstance() {
         if (instance == null) {
             instance = new Manager();
+
+            try (
+                Connection connection = DriverManager.getConnection(DATABASE_URL, DATABASE_USER, DATABASE_PASS);
+                Statement statement = connection.createStatement();
+            ) {
+                statement.executeQuery("SET NAMES 'utf8'");
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
         return instance;
     }
@@ -53,25 +61,8 @@ public class Manager {
         return null;
     }
 
-    public void create(String table, String[] params) {
-        String query = String.format("insert into %s values (%s)", table, count++ + ", " + String.join(", ", params));
-        executeQuery(query, null);
-    }
-
-    public void createTest() {
-        String query = String.format("insert into test values (%d)", count++);
-        try (
-            Connection connection = DriverManager.getConnection(DATABASE_URL, DATABASE_USER, DATABASE_PASS);
-            Statement statement = connection.createStatement();
-        ) {
-            statement.executeQuery(query);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public void createQuestion(String text, Long testId) {
-        String query = String.format("insert into question values (%d, %s, %d)", count++, text, testId);
+    public void create(String table, String params, Long count) {
+        String query = String.format("insert into %s values (%s)", table, count + params);
         try (
             Connection connection = DriverManager.getConnection(DATABASE_URL, DATABASE_USER, DATABASE_PASS);
             Statement statement = connection.createStatement();
@@ -112,7 +103,4 @@ public class Manager {
         }
     }
 
-	public static Long getCount() {
-		return count;
-	}
 }

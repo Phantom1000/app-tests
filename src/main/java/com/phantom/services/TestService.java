@@ -9,43 +9,46 @@ import com.phantom.utils.Manager;
 
 public class TestService {
 
-    /*public Test findById(Long id) {
+    private static Long count = 1L;
+    private final QuestionService questionService;
+
+    public Test findById(Long id) {
         return (Test)Manager.getInstance().getById(id, Test.getTable(), Test.getMapper());
-    }*/
+    }
 
     public ArrayList<Test> findAll() {
-        ArrayList<Test> res = new ArrayList<Test>();
-        for (Entity e : Manager.getInstance().list(Test.getTable(), Test.getMapper())) {
+        final ArrayList<Test> res = new ArrayList<Test>();
+        for (final Entity e : Manager.getInstance().list(Test.getTable(), Test.getMapper())) {
             res.add((Test)e);
         }
         return res;
     }
 
-    public ArrayList<Question> getQuestions(Long id) {
-        ArrayList<Question> res = new ArrayList<Question>();
-        for (Entity e : Manager.getInstance().oneToManyList(id, Question.getTable(), Question.getMapper())) {
+    public ArrayList<Question> getQuestions(final Long id) {
+        final ArrayList<Question> res = new ArrayList<Question>();
+        for (final Entity e : Manager.getInstance().oneToManyList(id, Question.getTable(), Question.getMapper())) {
             res.add((Question)e);
         }
         return res;
     }
 
-    public void Create(String[] questions) {
-        Long key = Manager.getCount();
-        Manager.getInstance().createTest();
+    public void Create(final String[] questions) {
+        Manager.getInstance().create(Test.getTable(), "", count++);
         for (String question : questions) {
-            Manager.getInstance().createQuestion(question, key);
+            questionService.Create(question, count - 1);
+            //Manager.getInstance().create(Question.getTable(), ", " + "'" + question + "'" + ", " + count.toString(), count++);
         }
     }
 
-    public void Edit(Long id, String[] questions) {
-        for (String question : questions) {
+    public void Edit(final Long id, final String[] questions) {
+        for (final String question : questions) {
             Manager.getInstance().updateQuestion(id, question);
         }
     }
 
-    public void Destroy(Long id) {
-        ArrayList<Question> questions = getQuestions(id);
-        for (Question question : questions) {
+    public void Destroy(final Long id) {
+        final ArrayList<Question> questions = getQuestions(id);
+        for (final Question question : questions) {
             Manager.getInstance().delete(question.getId(), Question.getTable());
         }
         Manager.getInstance().delete(id, Test.getTable());
@@ -54,9 +57,8 @@ public class TestService {
 	public TestService() {
         Test.setTable("test");
         Test.initMapper();
+        questionService = new QuestionService();
+    }
 
-        Question.setTable("question");
-        Question.initMapper();
-	}
 
 }

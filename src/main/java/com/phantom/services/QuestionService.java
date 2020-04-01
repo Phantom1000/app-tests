@@ -8,6 +8,8 @@ import com.phantom.utils.Manager;
 
 public class QuestionService {
 
+    private static Long count = 1L;
+
     public Question findById(Long id) {
         return null;
     }
@@ -20,8 +22,8 @@ public class QuestionService {
         return res;
     }
 
-    public void Create(Question test) {
-
+    public void Create(String text, Long testId) {
+        Manager.getInstance().create(Question.getTable(), ", " + "'" + text + "'" + ", " + testId, count++);
     }
 
     public void Save(Question test) {
@@ -35,6 +37,14 @@ public class QuestionService {
 	public QuestionService() {
         Question.setTable("question");
         Question.initMapper();
+	}
+
+	public static Long getCount() {
+		return count;
+	}
+
+	public static void setCount(Long count) {
+		QuestionService.count = count;
 	}
 
 
